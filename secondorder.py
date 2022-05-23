@@ -20,10 +20,7 @@ class ObjectiveFunction:
         pass
 
 
-class Hyperbolic(ObjectiveFunction):
-    def __init__(self):
-        self.optimum = tuple2colvec((0.0, 0.0))
-
+class Paraboloid(ObjectiveFunction):
     def __call__(self, x: np.array) -> float:
         x1, x2 = colvec2tuple(x)
         return x1 ** 2 + x2 ** 2
@@ -35,20 +32,26 @@ class Hyperbolic(ObjectiveFunction):
 
     def hessian(self, x) -> np.array:
         x1, x2 = colvec2tuple(x)
-        H = np.array([[2 * x1, 0], [0, 2 * x2]])
+        H = np.array([[2 * x1, 0.],
+                      [0., 2 * x2]])
         return H
 
 
 class SecondOrderOptimizer:
-    def __init__(self, args, f=Hyperbolic()):
+    def __init__(self, args):
         self.maxiter = args.maxiter
         self.stepsize = args.stepsize
+
+    def set_obj(self, f, optimum):
         self.f = f
+        self.f.optimum = tuple2colvec(optimum)
+        return self
 
     def get_B(self, x):
         pass
 
-    def run(self, x):
+    def fit(self, x_0: tuple):
+        x = tuple2colvec(x_0)
 
         for i in range(self.maxiter):
             print(f'iter: {i:02d} | x_opt: {colvec2tuple(x)} | value: {self.f(x)}')
@@ -59,8 +62,8 @@ class SecondOrderOptimizer:
 
 
 class VanillaNewtonsMethod(SecondOrderOptimizer):
-    def __init__(self, args, f=Hyperbolic()):
-        super(VanillaNewtonsMethod, self).__init__(args, f)
+    def __init__(self, args):
+        super(VanillaNewtonsMethod, self).__init__(args)
 
     def get_B(self, x):
         H = self.f.hessian(x)
@@ -75,5 +78,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # practice 1
-    x_0 = tuple2colvec((100., 100.))
-    VanillaNewtonsMethod(args).run(x_0)
+    x_0 = (100., 100.)
+    VanillaNewtonsMethod(args).set_obj(Paraboloid(), optimum=(0., 0.)).fit(x_0)
