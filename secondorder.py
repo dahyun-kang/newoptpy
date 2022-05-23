@@ -1,5 +1,5 @@
-import numpy as np
 import argparse
+import numpy as np
 
 
 def tuple2colvec(x: tuple) -> np.array:
@@ -72,7 +72,7 @@ class VanillaNewtonsMethod(SecondOrderOptimizer):
 
 if __name__ == '__main__':
     # Arguments parsing
-    parser = argparse.ArgumentParser(description='Second Order Gradient method from scratch')
+    parser = argparse.ArgumentParser(description='Second-order gradient method from scratch')
     parser.add_argument('--maxiter', type=int, default=100, help='Max iteration until it halts')
     parser.add_argument('--stepsize', type=float, default=1.0, help='Step size eta')
     args = parser.parse_args()
