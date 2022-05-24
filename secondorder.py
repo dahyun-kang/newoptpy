@@ -1,6 +1,7 @@
 import argparse
 import numpy as np
 from abc import abstractmethod
+from vis import Visualizer
 
 
 def tuple2colvec(x: tuple) -> np.array:
@@ -25,8 +26,8 @@ class ObjectiveFunction:
 
 
 class Paraboloid(ObjectiveFunction):
-    def __call__(self, x: np.array) -> float:
-        x1, x2 = colvec2tuple(x)
+    def __call__(self, x) -> float:
+        x1, x2 = x if isinstance(x, tuple) else colvec2tuple(x)
         return (x1 - 2.) ** 2 + (x2 - 2.) ** 2
 
     def compute_grad(self, x: np.array) -> np.array:
@@ -62,6 +63,7 @@ class SecondOrderOptimizer:
     def __init__(self, args):
         self.maxiter = args.maxiter
         self.stepsize = args.stepsize
+        self.dovis = args.vis
 
         # store x, G (first-order gradient), H (inverse of second-order gradient)
         self.mem = TrajectoryMem()
@@ -83,11 +85,15 @@ class SecondOrderOptimizer:
     def is_not_improved(self, x_prev, x, eps=1e-6):
         return np.abs(x_prev - x).sum() < eps
 
+    def vis(self):
+        visualizer = Visualizer(self.f, self.mem.xlist)
+        visualizer.run(methodname=type(self).__name__, fname='(x1-2)^2+(x2-2)^2')
+
     def fit(self, x_0: tuple):
         x = tuple2colvec(x_0)
 
         for i in range(self.maxiter):
-            print(f'iter: {i:02d} | x_opt: {colvec2tuple(x)} | value: {self.f(x)}')
+            print(f"iter: {i:02d} | (x1, x2) = {'({:.3f} {:.3f})'.format(*colvec2tuple(x))} | y = {self.f(x):.3f}")
             G = self.f.compute_grad(x)
             H = self.estimate_inv_hessian(x)
             x_prev = x
@@ -98,7 +104,9 @@ class SecondOrderOptimizer:
                 break
 
             self.mem.update(x, G, H)
-        print(f'\nGlobal optimum found at:\niter: {i:02d} | x_opt: {colvec2tuple(x)} | val_opt: {self.f(x)}')
+        print(f"\nGlobal optimum fount at:\niter: {i:02d} | x_opt = {'({:.3f} {:.3f})'.format(*colvec2tuple(x))} | y_opt = {self.f(x):.3f}")
+        if self.dovis:
+            self.vis()
 
 
 class VanillaNewtonsMethod(SecondOrderOptimizer):
@@ -157,6 +165,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Second-order gradient method from scratch')
     parser.add_argument('--maxiter', type=int, default=100, help='Max iteration until it halts')
     parser.add_argument('--stepsize', type=float, default=1.0, help='Step size eta')
+    parser.add_argument('--vis', action='store_true', help='Flag to visualize')
     args = parser.parse_args()
 
     # practice 1
