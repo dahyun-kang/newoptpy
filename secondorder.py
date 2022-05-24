@@ -42,6 +42,7 @@ class Paraboloid(ObjectiveFunction):
 
 class TrajectoryMem:
     def __init__(self):
+        self.xlist = []
         self.x = None
         self.x_prev = None
         self.G = None
@@ -49,9 +50,10 @@ class TrajectoryMem:
         self.H = None
 
     def update(self, x, G, H):
+        self.xlist.append(x)
         self.x_prev = self.x
-        self.G_prev = self.G
         self.x = x
+        self.G_prev = self.G
         self.G = G
         self.H = H
 
