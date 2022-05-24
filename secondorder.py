@@ -42,22 +42,45 @@ class SecondOrderOptimizer:
         self.maxiter = args.maxiter
         self.stepsize = args.stepsize
 
-    def set_obj(self, f, optimum):
+        # store x, grad_f, B_f (the estimated inverse of Hessian)
+        self.trajectory = {'x': [], 'grad': [], 'B': []}
+
+    def get_B(self, x: np.array):
+        """
+        Take x as an input and estimates the inverse of Hessian
+
+        :param x: input x
+        :return: inverse of Hessian
+        """
+        pass
+
+    def set_obj(self, f):
         self.f = f
-        self.f.optimum = tuple2colvec(optimum)
         return self
 
-    def get_B(self, x):
-        pass
+    def is_improved(self, x_prev, x, eps=1e-6):
+        return np.abs(x_prev - x).sum() < eps
+
+    def update_trajectory(self, x, grad, B):
+        self.trajectory['x'].append(x)
+        self.trajectory['grad'].append(grad)
+        self.trajectory['B'].append(B)
 
     def fit(self, x_0: tuple):
         x = tuple2colvec(x_0)
 
         for i in range(self.maxiter):
             print(f'iter: {i:02d} | x_opt: {colvec2tuple(x)} | value: {self.f(x)}')
-            x = x - self.stepsize * self.get_B(x) @ self.f.grad(x)
-            if np.abs(self.f.optimum - x).sum() < 1e-6:
+            grad = self.f.grad(x)
+            B = self.get_B(x)
+            x_prev = x
+
+            x = x - self.stepsize * B @ grad
+
+            if self.is_improved(x_prev, x):
                 break
+
+            self.update_trajectory(x, grad, B)
         print(f'\nGlobal optimum found at:\niter: {i:02d} | x_opt: {colvec2tuple(x)} | val_opt: {self.f(x)}')
 
 
@@ -70,6 +93,25 @@ class VanillaNewtonsMethod(SecondOrderOptimizer):
         return np.linalg.inv(H)
 
 
+class SymmetricRank1Update(SecondOrderOptimizer):
+    def __init__(self, args):
+        super(SymmetricRank1Update, self).__init__(args)
+
+    def get_B(self, x):
+        # Initialization of B is an arbitrary positive-definite matrix
+        if len(self.trajectory['x']) <= 1:
+            return np.identity(x.shape[0])
+
+        x_prev, x = self.trajectory['x'][-2], self.trajectory['x'][-1]
+        grad_prev, grad = self.trajectory['grad'][-2], self.trajectory['grad'][-1]
+        B = self.trajectory['B'][-1]
+
+        s = x - x_prev
+        y = grad - grad_prev
+        B_next = B + ((s - B @ y) @ (s - B @ y).T) / (((s - B @ y).T @ y) + 1e-6)
+        return B_next
+
+
 if __name__ == '__main__':
     # Arguments parsing
     parser = argparse.ArgumentParser(description='Second-order gradient method from scratch')
@@ -79,4 +121,5 @@ if __name__ == '__main__':
 
     # practice 1
     x_0 = (100., 100.)
-    VanillaNewtonsMethod(args).set_obj(Paraboloid(), optimum=(0., 0.)).fit(x_0)
+    # VanillaNewtonsMethod(args).set_obj(Paraboloid()).fit(x_0)
+    SymmetricRank1Update(args).set_obj(Paraboloid()).fit(x_0)
