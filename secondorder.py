@@ -16,9 +16,10 @@ class ObjectiveFunction:
         pass
 
     @abstractmethod
-    def grad(self, x: np.array) -> np.array:
+    def compute_grad(self, x: np.array) -> np.array:
         pass
 
+    @abstractmethod
     def hessian(self, x: np.array) -> np.array:
         pass
 
@@ -28,16 +29,15 @@ class Paraboloid(ObjectiveFunction):
         x1, x2 = colvec2tuple(x)
         return x1 ** 2 + x2 ** 2
 
-    def grad(self, x: np.array) -> np.array:
+    def compute_grad(self, x: np.array) -> np.array:
         x1, x2 = colvec2tuple(x)
         grad_tuple = (2. * x1, 2. * x2)
         return tuple2colvec(grad_tuple)
 
     def hessian(self, x) -> np.array:
         x1, x2 = colvec2tuple(x)
-        H = np.array([[2 * x1, 0.],
-                      [0., 2 * x2]])
-        return H
+        return np.array([[2 * x1, 0.],
+                         [0., 2 * x2]])
 
 
 class SecondOrderOptimizer:
@@ -45,11 +45,11 @@ class SecondOrderOptimizer:
         self.maxiter = args.maxiter
         self.stepsize = args.stepsize
 
-        # store x, grad_f, B_f (the estimated inverse of Hessian)
-        self.trajectory = {'x': [], 'grad': [], 'B': []}
+        # store x, G (first-order gradient), H (inverse of second-order gradient)
+        self.trajectory = {'x': [], 'G': [], 'H': []}
 
     @abstractmethod
-    def get_B(self, x: np.array):
+    def estimate_inv_hessian(self, x: np.array):
         """
         Take x as an input and estimates the inverse of Hessian
 
@@ -65,69 +65,66 @@ class SecondOrderOptimizer:
     def is_improved(self, x_prev, x, eps=1e-6):
         return np.abs(x_prev - x).sum() < eps
 
-    def update_trajectory(self, x, grad, B):
+    def update_trajectory(self, x, G, H):
         self.trajectory['x'].append(x)
-        self.trajectory['grad'].append(grad)
-        self.trajectory['B'].append(B)
+        self.trajectory['G'].append(G)
+        self.trajectory['H'].append(H)
 
     def fit(self, x_0: tuple):
         x = tuple2colvec(x_0)
 
         for i in range(self.maxiter):
             print(f'iter: {i:02d} | x_opt: {colvec2tuple(x)} | value: {self.f(x)}')
-            grad = self.f.grad(x)
-            B = self.get_B(x)
+            G = self.f.compute_grad(x)
+            H = self.estimate_inv_hessian(x)
             x_prev = x
 
-            x = x - self.stepsize * B @ grad
+            x = x - self.stepsize * H @ G
 
             if self.is_improved(x_prev, x):
                 break
 
-            self.update_trajectory(x, grad, B)
+            self.update_trajectory(x, G, H)
         print(f'\nGlobal optimum found at:\niter: {i:02d} | x_opt: {colvec2tuple(x)} | val_opt: {self.f(x)}')
 
 
 class VanillaNewtonsMethod(SecondOrderOptimizer):
-    def get_B(self, x):
+    def estimate_inv_hessian(self, x):
         H = self.f.hessian(x)
         return np.linalg.inv(H)
 
 
 class SymmetricRank1Update(SecondOrderOptimizer):
-    def get_B(self, x):
+    def estimate_inv_hessian(self, x):
         # Initialization of B is an arbitrary positive-definite matrix
         if len(self.trajectory['x']) <= 1:
             return np.identity(x.shape[0])
 
         x_prev, x = self.trajectory['x'][-2], self.trajectory['x'][-1]
-        grad_prev, grad = self.trajectory['grad'][-2], self.trajectory['grad'][-1]
-        B = self.trajectory['B'][-1]
+        G_prev, G = self.trajectory['G'][-2], self.trajectory['G'][-1]
+        H = self.trajectory['H'][-1]
 
         s = x - x_prev
-        y = grad - grad_prev
-        B_next = B + ((s - B @ y) @ (s - B @ y).T) / (((s - B @ y).T @ y) + 1e-6)
-        return B_next
+        y = G - G_prev
+        H_next = H + ((s - H @ y) @ (s - H @ y).T) / (((s - H @ y).T @ y) + 1e-6)
+        return H_next
 
 
 class SymmetricRank2Update(SecondOrderOptimizer):
-    def get_B(self, x):
+    def estimate_inv_hessian(self, x):
         # Initialization of B is an arbitrary positive-definite matrix
         eye = np.identity(x.shape[0])
         if len(self.trajectory['x']) <= 1:
             return eye
 
         x_prev, x = self.trajectory['x'][-2], self.trajectory['x'][-1]
-        grad_prev, grad = self.trajectory['grad'][-2], self.trajectory['grad'][-1]
-        B = self.trajectory['B'][-2]
-        # B = (grad - grad_prev) / (x - x_prev)
+        G_prev, G = self.trajectory['G'][-2], self.trajectory['G'][-1]
+        H = self.trajectory['H'][-2]
 
         s = x - x_prev
-        y = grad - grad_prev
-        # B_next = (eye - (y @ s.T) / (y.T @ s)) @ B @ (eye - (s @ y.T) / (y.T @ s)) + ((y @ y.T) / (y.T @ s))
-        B_next = B - ((B @ y @ y.T @ B) / (y.T @ B @ y)) + ((s @ s.T) / (y.T @ s))
-        # print(B_next)
-        return B_next
+        y = G - G_prev
+        H_next = H - ((H @ y @ y.T @ H) / (y.T @ H @ y)) + ((s @ s.T) / (y.T @ s))
+        return H_next
 
 
 if __name__ == '__main__':
