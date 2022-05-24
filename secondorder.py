@@ -1,5 +1,6 @@
 import argparse
 import numpy as np
+from abc import abstractmethod
 
 
 def tuple2colvec(x: tuple) -> np.array:
@@ -10,9 +11,11 @@ def colvec2tuple(x: np.array) -> tuple:
 
 
 class ObjectiveFunction:
+    @abstractmethod
     def __call__(self, x: np.array) -> float:
         pass
 
+    @abstractmethod
     def grad(self, x: np.array) -> np.array:
         pass
 
@@ -45,6 +48,7 @@ class SecondOrderOptimizer:
         # store x, grad_f, B_f (the estimated inverse of Hessian)
         self.trajectory = {'x': [], 'grad': [], 'B': []}
 
+    @abstractmethod
     def get_B(self, x: np.array):
         """
         Take x as an input and estimates the inverse of Hessian
