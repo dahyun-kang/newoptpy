@@ -1,7 +1,7 @@
 import argparse
 import numpy as np
 from abc import abstractmethod
-from vis import Visualizer
+from viz import Visualizer
 
 
 def tuple2colvec(x: tuple) -> np.array:
