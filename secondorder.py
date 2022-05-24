@@ -40,13 +40,29 @@ class Paraboloid(ObjectiveFunction):
                          [0., 2 * x2]])
 
 
+class TrajectoryMem:
+    def __init__(self):
+        self.x = None
+        self.x_prev = None
+        self.G = None
+        self.G_prev = None
+        self.H = None
+
+    def update(self, x, G, H):
+        self.x_prev = self.x
+        self.G_prev = self.G
+        self.x = x
+        self.G = G
+        self.H = H
+
+
 class SecondOrderOptimizer:
     def __init__(self, args):
         self.maxiter = args.maxiter
         self.stepsize = args.stepsize
 
         # store x, G (first-order gradient), H (inverse of second-order gradient)
-        self.trajectory = {'x': [], 'G': [], 'H': []}
+        self.mem = TrajectoryMem()
 
     @abstractmethod
     def estimate_inv_hessian(self, x: np.array):
@@ -65,11 +81,6 @@ class SecondOrderOptimizer:
     def is_not_improved(self, x_prev, x, eps=1e-6):
         return np.abs(x_prev - x).sum() < eps
 
-    def update_trajectory(self, x, G, H):
-        self.trajectory['x'].append(x)
-        self.trajectory['G'].append(G)
-        self.trajectory['H'].append(H)
-
     def fit(self, x_0: tuple):
         x = tuple2colvec(x_0)
 
@@ -84,7 +95,7 @@ class SecondOrderOptimizer:
             if self.is_not_improved(x_prev, x):
                 break
 
-            self.update_trajectory(x, G, H)
+            self.mem.update(x, G, H)
         print(f'\nGlobal optimum found at:\niter: {i:02d} | x_opt: {colvec2tuple(x)} | val_opt: {self.f(x)}')
 
 
@@ -96,16 +107,15 @@ class VanillaNewtonsMethod(SecondOrderOptimizer):
 
 class Davidon(SecondOrderOptimizer):
     def estimate_inv_hessian(self, x):
+        eye = np.identity(x.shape[0])
         # Initialization of B is an arbitrary positive-definite matrix
-        if len(self.trajectory['x']) <= 1:
-            return np.identity(x.shape[0])
+        if self.mem.x_prev is None:
+            return eye
 
-        x_prev, x = self.trajectory['x'][-2], self.trajectory['x'][-1]
-        G_prev, G = self.trajectory['G'][-2], self.trajectory['G'][-1]
-        H = self.trajectory['H'][-1]
+        s = self.mem.x - self.mem.x_prev
+        y = self.mem.G - self.mem.G_prev
+        H = self.mem.H
 
-        s = x - x_prev
-        y = G - G_prev
         H_next = H + ((s - H @ y) @ (s - H @ y).T) / (((s - H @ y).T @ y) + 1e-6)
         return H_next
 
@@ -114,15 +124,13 @@ class DavidonFletcherPowell(SecondOrderOptimizer):
     def estimate_inv_hessian(self, x):
         # Initialization of B is an arbitrary positive-definite matrix
         eye = np.identity(x.shape[0])
-        if len(self.trajectory['x']) <= 1:
+        if self.mem.x_prev is None:
             return eye
 
-        x_prev, x = self.trajectory['x'][-2], self.trajectory['x'][-1]
-        G_prev, G = self.trajectory['G'][-2], self.trajectory['G'][-1]
-        H = self.trajectory['H'][-2]
+        s = self.mem.x - self.mem.x_prev
+        y = self.mem.G - self.mem.G_prev
+        H = self.mem.H
 
-        s = x - x_prev
-        y = G - G_prev
         H_next = H - ((H @ y @ y.T @ H) / (y.T @ H @ y)) + ((s @ s.T) / (y.T @ s))
         return H_next
 
@@ -131,15 +139,13 @@ class BroydenFletcherGoldfarbShanno(SecondOrderOptimizer):
     def estimate_inv_hessian(self, x):
         # Initialization of B is an arbitrary positive-definite matrix
         eye = np.identity(x.shape[0])
-        if len(self.trajectory['x']) <= 1:
+        if self.mem.x_prev is None:
             return eye
 
-        x_prev, x = self.trajectory['x'][-2], self.trajectory['x'][-1]
-        G_prev, G = self.trajectory['G'][-2], self.trajectory['G'][-1]
-        H = self.trajectory['H'][-2]
+        s = self.mem.x - self.mem.x_prev
+        y = self.mem.G - self.mem.G_prev
+        H = self.mem.H
 
-        s = x - x_prev
-        y = G - G_prev
         H_next = (eye - (s @ y.T) / (y.T @ s)) @ H @ (eye - (y @ s.T) / (y.T @ s)) + ((s @ s.T) / (y.T @ s))
         return H_next
 
