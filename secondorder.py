@@ -110,6 +110,26 @@ class SymmetricRank1Update(SecondOrderOptimizer):
         return B_next
 
 
+class SymmetricRank2Update(SecondOrderOptimizer):
+    def get_B(self, x):
+        # Initialization of B is an arbitrary positive-definite matrix
+        eye = np.identity(x.shape[0])
+        if len(self.trajectory['x']) <= 1:
+            return eye
+
+        x_prev, x = self.trajectory['x'][-2], self.trajectory['x'][-1]
+        grad_prev, grad = self.trajectory['grad'][-2], self.trajectory['grad'][-1]
+        B = self.trajectory['B'][-2]
+        # B = (grad - grad_prev) / (x - x_prev)
+
+        s = x - x_prev
+        y = grad - grad_prev
+        # B_next = (eye - (y @ s.T) / (y.T @ s)) @ B @ (eye - (s @ y.T) / (y.T @ s)) + ((y @ y.T) / (y.T @ s))
+        B_next = B - ((B @ y @ y.T @ B) / (y.T @ B @ y)) + ((s @ s.T) / (y.T @ s))
+        # print(B_next)
+        return B_next
+
+
 if __name__ == '__main__':
     # Arguments parsing
     parser = argparse.ArgumentParser(description='Second-order gradient method from scratch')
@@ -120,4 +140,5 @@ if __name__ == '__main__':
     # practice 1
     x_0 = (100., 100.)
     # VanillaNewtonsMethod(args).set_obj(Paraboloid()).fit(x_0)
-    SymmetricRank1Update(args).set_obj(Paraboloid()).fit(x_0)  # goes towards infinity x0x
+    # SymmetricRank1Update(args).set_obj(Paraboloid()).fit(x_0)  # goes towards infinity x0x
+    SymmetricRank2Update(args).set_obj(Paraboloid()).fit(x_0)
