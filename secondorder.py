@@ -27,11 +27,11 @@ class ObjectiveFunction:
 class Paraboloid(ObjectiveFunction):
     def __call__(self, x: np.array) -> float:
         x1, x2 = colvec2tuple(x)
-        return x1 ** 2 + x2 ** 2
+        return (x1 - 2.) ** 2 + (x2 - 2.) ** 2
 
     def compute_grad(self, x: np.array) -> np.array:
         x1, x2 = colvec2tuple(x)
-        grad_tuple = (2. * x1, 2. * x2)
+        grad_tuple = (2. * (x1 - 2.), 2. * (x2 - 2.))
         return tuple2colvec(grad_tuple)
 
     def hessian(self, x) -> np.array:
@@ -62,7 +62,7 @@ class SecondOrderOptimizer:
         self.f = f
         return self
 
-    def is_improved(self, x_prev, x, eps=1e-6):
+    def is_not_improved(self, x_prev, x, eps=1e-6):
         return np.abs(x_prev - x).sum() < eps
 
     def update_trajectory(self, x, G, H):
@@ -81,7 +81,7 @@ class SecondOrderOptimizer:
 
             x = x - self.stepsize * H @ G
 
-            if self.is_improved(x_prev, x):
+            if self.is_not_improved(x_prev, x):
                 break
 
             self.update_trajectory(x, G, H)
@@ -94,7 +94,7 @@ class VanillaNewtonsMethod(SecondOrderOptimizer):
         return np.linalg.inv(H)
 
 
-class SymmetricRank1Update(SecondOrderOptimizer):
+class Davidon(SecondOrderOptimizer):
     def estimate_inv_hessian(self, x):
         # Initialization of B is an arbitrary positive-definite matrix
         if len(self.trajectory['x']) <= 1:
@@ -110,7 +110,7 @@ class SymmetricRank1Update(SecondOrderOptimizer):
         return H_next
 
 
-class SymmetricRank2Update(SecondOrderOptimizer):
+class DavidonFletcherPowell(SecondOrderOptimizer):
     def estimate_inv_hessian(self, x):
         # Initialization of B is an arbitrary positive-definite matrix
         eye = np.identity(x.shape[0])
@@ -127,6 +127,23 @@ class SymmetricRank2Update(SecondOrderOptimizer):
         return H_next
 
 
+class BroydenFletcherGoldfarbShanno(SecondOrderOptimizer):
+    def estimate_inv_hessian(self, x):
+        # Initialization of B is an arbitrary positive-definite matrix
+        eye = np.identity(x.shape[0])
+        if len(self.trajectory['x']) <= 1:
+            return eye
+
+        x_prev, x = self.trajectory['x'][-2], self.trajectory['x'][-1]
+        G_prev, G = self.trajectory['G'][-2], self.trajectory['G'][-1]
+        H = self.trajectory['H'][-2]
+
+        s = x - x_prev
+        y = G - G_prev
+        H_next = (eye - (s @ y.T) / (y.T @ s)) @ H @ (eye - (y @ s.T) / (y.T @ s)) + ((s @ s.T) / (y.T @ s))
+        return H_next
+
+
 if __name__ == '__main__':
     # Arguments parsing
     parser = argparse.ArgumentParser(description='Second-order gradient method from scratch')
@@ -137,5 +154,6 @@ if __name__ == '__main__':
     # practice 1
     x_0 = (100., 100.)
     # VanillaNewtonsMethod(args).set_obj(Paraboloid()).fit(x_0)
-    # SymmetricRank1Update(args).set_obj(Paraboloid()).fit(x_0)  # goes towards infinity x0x
-    SymmetricRank2Update(args).set_obj(Paraboloid()).fit(x_0)
+    # Davidon(args).set_obj(Paraboloid()).fit(x_0)  # goes towards infinity x0x
+    # DavidonFletcherPowell(args).set_obj(Paraboloid()).fit(x_0)
+    BroydenFletcherGoldfarbShanno(args).set_obj(Paraboloid()).fit(x_0)
