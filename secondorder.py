@@ -126,4 +126,4 @@ if __name__ == '__main__':
     # practice 1
     x_0 = (100., 100.)
     # VanillaNewtonsMethod(args).set_obj(Paraboloid()).fit(x_0)
-    SymmetricRank1Update(args).set_obj(Paraboloid()).fit(x_0)
+    SymmetricRank1Update(args).set_obj(Paraboloid()).fit(x_0)  # goes towards infinity x0x
