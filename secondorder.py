@@ -163,7 +163,7 @@ class BroydenFletcherGoldfarbShanno(SecondOrderOptimizer):
 if __name__ == '__main__':
     # Arguments parsing
     parser = argparse.ArgumentParser(description='Second-order gradient method from scratch')
-    parser.add_argument('--maxiter', type=int, default=100, help='Max iteration until it halts')
+    parser.add_argument('--maxiter', type=int, default=10000, help='Max iteration until it halts')
     parser.add_argument('--stepsize', type=float, default=1.0, help='Step size eta')
     parser.add_argument('--vis', action='store_true', help='Flag to visualize')
     args = parser.parse_args()

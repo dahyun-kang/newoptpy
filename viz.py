@@ -38,7 +38,7 @@ class Visualizer:
             ax.view_init(elev=10., azim=i)
             return fig,
 
-        anim = animation.FuncAnimation(fig, animate, frames=180, interval=20, blit=True)
+        anim = animation.FuncAnimation(fig, animate, frames=275, interval=20, blit=True)
         filename = f"results/{methodname}_{fname.replace(' ', '_')}.gif"
         print(f'Visualizing the trajectory at {filename} ...')
         anim.save(filename, fps=30)
