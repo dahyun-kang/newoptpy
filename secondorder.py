@@ -89,18 +89,12 @@ class SecondOrderOptimizer:
 
 
 class VanillaNewtonsMethod(SecondOrderOptimizer):
-    def __init__(self, args):
-        super(VanillaNewtonsMethod, self).__init__(args)
-
     def get_B(self, x):
         H = self.f.hessian(x)
         return np.linalg.inv(H)
 
 
 class SymmetricRank1Update(SecondOrderOptimizer):
-    def __init__(self, args):
-        super(SymmetricRank1Update, self).__init__(args)
-
     def get_B(self, x):
         # Initialization of B is an arbitrary positive-definite matrix
         if len(self.trajectory['x']) <= 1:
