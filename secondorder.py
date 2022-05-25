@@ -2,61 +2,7 @@ import argparse
 import numpy as np
 from abc import abstractmethod
 from viz import Visualizer
-
-
-def tuple2colvec(x: tuple) -> np.array:
-    return np.array(x)[np.newaxis, ...].T
-
-def colvec2tuple(x: np.array) -> tuple:
-    return tuple(x.T[0])
-
-
-class ObjectiveFunction:
-    @abstractmethod
-    def __call__(self, x: np.array) -> float:
-        pass
-
-    @abstractmethod
-    def compute_grad(self, x: np.array) -> np.array:
-        pass
-
-    @abstractmethod
-    def hessian(self, x: np.array) -> np.array:
-        pass
-
-
-class Paraboloid(ObjectiveFunction):
-    def __call__(self, x) -> float:
-        x1, x2 = x if isinstance(x, tuple) else colvec2tuple(x)
-        return (x1 - 2.) ** 2 + (x2 - 2.) ** 2
-
-    def compute_grad(self, x: np.array) -> np.array:
-        x1, x2 = colvec2tuple(x)
-        grad_tuple = (2. * (x1 - 2.), 2. * (x2 - 2.))
-        return tuple2colvec(grad_tuple)
-
-    def hessian(self, x) -> np.array:
-        x1, x2 = colvec2tuple(x)
-        return np.array([[2 * x1, 0.],
-                         [0., 2 * x2]])
-
-
-class TrajectoryMem:
-    def __init__(self):
-        self.xlist = []
-        self.x = None
-        self.x_prev = None
-        self.G = None
-        self.G_prev = None
-        self.H = None
-
-    def update(self, x, G, H):
-        self.xlist.append(x)
-        self.x_prev = self.x
-        self.x = x
-        self.G_prev = self.G
-        self.G = G
-        self.H = H
+from util import TrajectoryMem, tuple2colvec, colvec2tuple
 
 
 class SecondOrderOptimizer:
@@ -169,6 +115,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # practice 1
+    from objfunction import Paraboloid
     x_0 = (100., 100.)
     # VanillaNewtonsMethod(args).set_obj(Paraboloid()).fit(x_0)
     # Davidon(args).set_obj(Paraboloid()).fit(x_0)  # goes towards infinity x0x
