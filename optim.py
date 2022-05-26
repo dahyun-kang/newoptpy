@@ -22,7 +22,7 @@ class FirstOrderGradOptimizer:
 
     def vis(self):
         visualizer = Visualizer(self.f, self.mem.xlist)
-        visualizer.run(methodname=type(self).__name__, fname='(x1-2)^2+(x2-2)^2')
+        visualizer.run(methodname=type(self).__name__, fname='(x1-2)^2+(x2-2)^2', stepsize=self.stepsize)
 
     def fit(self, x_0: tuple):
         x = tuple2colvec(x_0)
@@ -71,7 +71,7 @@ class SecondOrderGradOptimizer:
 
     def vis(self):
         visualizer = Visualizer(self.f, self.mem.xlist)
-        visualizer.run(methodname=type(self).__name__, fname='(x1-2)^2+(x2-2)^2')
+        visualizer.run(methodname=type(self).__name__, fname='(x1-2)^2+(x2-2)^2', stepsize=self.stepsize)
 
     def fit(self, x_0: tuple):
         x = tuple2colvec(x_0)
