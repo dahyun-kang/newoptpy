@@ -4,7 +4,7 @@ from viz import Visualizer
 from util import TrajectoryMem, tuple2colvec, colvec2tuple
 
 
-class FirstOrderGradOptimizer:
+class GradOptimizer:
     def __init__(self, args):
         self.args = args
         self.maxiter = args.maxiter
@@ -12,6 +12,7 @@ class FirstOrderGradOptimizer:
         self.doviz = args.viz
 
         # store x, G (first-order gradient), H (inverse of second-order gradient)
+        # required for visualization purpose
         self.mem = TrajectoryMem()
 
     def set_obj(self, f):
@@ -25,6 +26,12 @@ class FirstOrderGradOptimizer:
         visualizer = Visualizer(self.f, self.mem.xlist)
         visualizer.run(methodname=type(self).__name__, fname=type(self.f).__name__, args=self.args)
 
+    @abstractmethod
+    def fit(self, x_0: tuple):
+        pass
+
+
+class FirstOrderGradOptimizer(GradOptimizer):
     def fit(self, x_0: tuple):
         x = tuple2colvec(x_0)
 
@@ -44,16 +51,7 @@ class FirstOrderGradOptimizer:
             self.viz()
 
 
-class SecondOrderGradOptimizer:
-    def __init__(self, args):
-        self.args = args
-        self.maxiter = args.maxiter
-        self.stepsize = args.stepsize
-        self.doviz = args.viz
-
-        # store x, G (first-order gradient), H (inverse of second-order gradient)
-        self.mem = TrajectoryMem()
-
+class SecondOrderGradOptimizer(GradOptimizer):
     @abstractmethod
     def estimate_inv_hessian(self, x: np.array):
         """
@@ -63,17 +61,6 @@ class SecondOrderGradOptimizer:
         :return: inverse of Hessian
         """
         pass
-
-    def set_obj(self, f):
-        self.f = f
-        return self
-
-    def is_not_improved(self, x_prev, x, eps=1e-6):
-        return np.abs(x_prev - x).sum() < eps
-
-    def viz(self):
-        visualizer = Visualizer(self.f, self.mem.xlist)
-        visualizer.run(methodname=type(self).__name__, fname=type(self.f).__name__, args=self.args)
 
     def fit(self, x_0: tuple):
         x = tuple2colvec(x_0)
