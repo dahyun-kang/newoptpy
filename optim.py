@@ -1,4 +1,3 @@
-import argparse
 import numpy as np
 from abc import abstractmethod
 from viz import Visualizer
@@ -143,21 +142,3 @@ class BroydenFletcherGoldfarbShanno(SecondOrderGradOptimizer):
 
         H_next = (eye - (s @ y.T) / (y.T @ s)) @ H @ (eye - (y @ s.T) / (y.T @ s)) + ((s @ s.T) / (y.T @ s))
         return H_next
-
-
-if __name__ == '__main__':
-    # Arguments parsing
-    parser = argparse.ArgumentParser(description='Second-order gradient method from scratch')
-    parser.add_argument('--maxiter', type=int, default=10000, help='Max iteration until it halts')
-    parser.add_argument('--stepsize', type=float, default=1.0, help='Step size eta')
-    parser.add_argument('--vis', action='store_true', help='Flag to visualize')
-    args = parser.parse_args()
-
-    # practice 1
-    from objfunction import Paraboloid
-    x_0 = (100., 100.)
-    # VanillaNewtonsMethod(args).set_obj(Paraboloid()).fit(x_0)
-    # Davidon(args).set_obj(Paraboloid()).fit(x_0)  # goes towards infinity x0x
-    # DavidonFletcherPowell(args).set_obj(Paraboloid()).fit(x_0)
-    # BroydenFletcherGoldfarbShanno(args).set_obj(Paraboloid()).fit(x_0)
-    FirstOrderGradOptimizer(args).set_obj(Paraboloid()).fit(x_0)
