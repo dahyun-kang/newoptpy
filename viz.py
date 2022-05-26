@@ -8,7 +8,7 @@ class Visualizer:
         self.f = f
         self.xlist = xlist
 
-    def run(self, methodname: str, fname: str, args: dict):
+    def run(self, methodname: str, fname: str, totalstep: int, args: dict):
         self.X1 = np.hstack(self.xlist)[0]
         self.X2 = np.hstack(self.xlist)[1]
         Y = [self.f((x1, x2)) for x1, x2 in zip(self.X1, self.X2)]
@@ -26,7 +26,7 @@ class Visualizer:
         fontlabel = {"fontsize":"large", "color":"black", "fontweight":"bold"}
         ax.set_xlabel("x1", fontdict=fontlabel, labelpad=16)
         ax.set_ylabel('x2', fontdict=fontlabel, labelpad=16)
-        ax.set_title(f"{methodname}\n\n{fname}", fontdict=fontlabel)
+        ax.set_title(f"{fname}\n\n{methodname} took {totalstep} steps", fontdict=fontlabel)
         ax.view_init(elev=30., azim=120)
 
         # scatter landscape
