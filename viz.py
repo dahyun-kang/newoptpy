@@ -35,7 +35,8 @@ class Visualizer:
         ax.view_init(elev=30., azim=120)
 
         # scatter landscape
-        ax.scatter(X1_2d, X2_2d, Y_2d, c=Y_2d, cmap="inferno", s=5, alpha=0.1)
+        # cmap = 'inferno'
+        ax.scatter(X1_2d, X2_2d, Y_2d, c=Y_2d, cmap="cool", s=5, alpha=0.1)
         # scatter path
         ax.scatter(X1_path, X2_path, Y_path, c='red', s=8, alpha=1.)
 
