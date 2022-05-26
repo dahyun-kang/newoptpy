@@ -20,7 +20,7 @@ class Visualizer:
         X2 = np.linspace(-X2absmax, X2absmax, 100)
 
         X1_2d, X2_2d = np.meshgrid(X1, X2)
-        Y_2d = np.array([self.f((x1, x2)) for x1 in X1 for x2 in X2])
+        Y_2d = np.array([self.f((x1, x2)) for x2 in X2 for x1 in X1])
 
         fig, ax = plt.subplots(figsize=(10, 5), subplot_kw={"projection":"3d"})
         fontlabel = {"fontsize":"large", "color":"black", "fontweight":"bold"}
