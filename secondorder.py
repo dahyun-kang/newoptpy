@@ -5,7 +5,46 @@ from viz import Visualizer
 from util import TrajectoryMem, tuple2colvec, colvec2tuple
 
 
-class SecondOrderOptimizer:
+class FirstOrderGradOptimizer:
+    def __init__(self, args):
+        self.maxiter = args.maxiter
+        self.stepsize = args.stepsize
+        self.dovis = args.vis
+
+        # store x, G (first-order gradient), H (inverse of second-order gradient)
+        self.mem = TrajectoryMem()
+
+    def set_obj(self, f):
+        self.f = f
+        return self
+
+    def is_not_improved(self, x_prev, x, eps=1e-6):
+        return np.abs(x_prev - x).sum() < eps
+
+    def vis(self):
+        visualizer = Visualizer(self.f, self.mem.xlist)
+        visualizer.run(methodname=type(self).__name__, fname='(x1-2)^2+(x2-2)^2')
+
+    def fit(self, x_0: tuple):
+        x = tuple2colvec(x_0)
+
+        for i in range(self.maxiter):
+            print(f"iter: {i:02d} | (x1, x2) = {'({:.3f} {:.3f})'.format(*colvec2tuple(x))} | y = {self.f(x):.3f}")
+            G = self.f.compute_grad(x)
+            x_prev = x
+
+            x = x - self.stepsize * G
+
+            if self.is_not_improved(x_prev, x):
+                break
+            self.mem.update(x, G)
+
+        print(f"\nGlobal optimum fount at:\niter: {i:02d} | x_opt = {'({:.3f} {:.3f})'.format(*colvec2tuple(x))} | y_opt = {self.f(x):.3f}")
+        if self.dovis:
+            self.vis()
+
+
+class SecondOrderGradOptimizer:
     def __init__(self, args):
         self.maxiter = args.maxiter
         self.stepsize = args.stepsize
@@ -55,13 +94,13 @@ class SecondOrderOptimizer:
             self.vis()
 
 
-class VanillaNewtonsMethod(SecondOrderOptimizer):
+class VanillaNewtonsMethod(SecondOrderGradOptimizer):
     def estimate_inv_hessian(self, x):
         H = self.f.hessian(x)
         return np.linalg.inv(H)
 
 
-class Davidon(SecondOrderOptimizer):
+class Davidon(SecondOrderGradOptimizer):
     def estimate_inv_hessian(self, x):
         eye = np.identity(x.shape[0])
         # Initialization of B is an arbitrary positive-definite matrix
@@ -76,7 +115,7 @@ class Davidon(SecondOrderOptimizer):
         return H_next
 
 
-class DavidonFletcherPowell(SecondOrderOptimizer):
+class DavidonFletcherPowell(SecondOrderGradOptimizer):
     def estimate_inv_hessian(self, x):
         # Initialization of B is an arbitrary positive-definite matrix
         eye = np.identity(x.shape[0])
@@ -91,7 +130,7 @@ class DavidonFletcherPowell(SecondOrderOptimizer):
         return H_next
 
 
-class BroydenFletcherGoldfarbShanno(SecondOrderOptimizer):
+class BroydenFletcherGoldfarbShanno(SecondOrderGradOptimizer):
     def estimate_inv_hessian(self, x):
         # Initialization of B is an arbitrary positive-definite matrix
         eye = np.identity(x.shape[0])
@@ -120,4 +159,5 @@ if __name__ == '__main__':
     # VanillaNewtonsMethod(args).set_obj(Paraboloid()).fit(x_0)
     # Davidon(args).set_obj(Paraboloid()).fit(x_0)  # goes towards infinity x0x
     # DavidonFletcherPowell(args).set_obj(Paraboloid()).fit(x_0)
-    BroydenFletcherGoldfarbShanno(args).set_obj(Paraboloid()).fit(x_0)
+    # BroydenFletcherGoldfarbShanno(args).set_obj(Paraboloid()).fit(x_0)
+    FirstOrderGradOptimizer(args).set_obj(Paraboloid()).fit(x_0)

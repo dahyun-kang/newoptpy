@@ -17,10 +17,11 @@ class TrajectoryMem:
         self.G_prev = None
         self.H = None
 
-    def update(self, x, G, H):
+    def update(self, x, G, H=None):
         self.xlist.append(x)
         self.x_prev = self.x
         self.x = x
         self.G_prev = self.G
         self.G = G
-        self.H = H
+        if H is not None:
+            self.H = H
