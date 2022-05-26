@@ -8,7 +8,7 @@ class Visualizer:
         self.f = f
         self.xlist = xlist
 
-    def run(self, methodname: str, fname: str, stepsize: float):
+    def run(self, methodname: str, fname: str, args: dict):
         self.X1 = np.hstack(self.xlist)[0]
         self.X2 = np.hstack(self.xlist)[1]
         Y = [self.f((x1, x2)) for x1, x2 in zip(self.X1, self.X2)]
@@ -39,6 +39,6 @@ class Visualizer:
             return fig,
 
         anim = animation.FuncAnimation(fig, animate, frames=275, interval=20, blit=True)
-        filename = f"results/{methodname}_{fname.replace(' ', '_')}_stepsize{stepsize}.gif"
+        filename = f"results/{methodname}_{fname.replace(' ', '_')}_stepsize{args.stepsize}_init{args.init}.gif"
         print(f'Visualizing the trajectory at {filename} ...')
         anim.save(filename, fps=30)

@@ -6,6 +6,7 @@ from util import TrajectoryMem, tuple2colvec, colvec2tuple
 
 class FirstOrderGradOptimizer:
     def __init__(self, args):
+        self.args = args
         self.maxiter = args.maxiter
         self.stepsize = args.stepsize
         self.doviz = args.viz
@@ -22,7 +23,7 @@ class FirstOrderGradOptimizer:
 
     def viz(self):
         visualizer = Visualizer(self.f, self.mem.xlist)
-        visualizer.run(methodname=type(self).__name__, fname=type(self.f).__name__, stepsize=self.stepsize)
+        visualizer.run(methodname=type(self).__name__, fname=type(self.f).__name__, args=self.args)
 
     def fit(self, x_0: tuple):
         x = tuple2colvec(x_0)
@@ -45,6 +46,7 @@ class FirstOrderGradOptimizer:
 
 class SecondOrderGradOptimizer:
     def __init__(self, args):
+        self.args = args
         self.maxiter = args.maxiter
         self.stepsize = args.stepsize
         self.doviz = args.viz
@@ -71,7 +73,7 @@ class SecondOrderGradOptimizer:
 
     def viz(self):
         visualizer = Visualizer(self.f, self.mem.xlist)
-        visualizer.run(methodname=type(self).__name__, fname=type(self.f).__name__, stepsize=self.stepsize)
+        visualizer.run(methodname=type(self).__name__, fname=type(self.f).__name__, args=self.args)
 
     def fit(self, x_0: tuple):
         x = tuple2colvec(x_0)
