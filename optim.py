@@ -22,9 +22,10 @@ class GradOptimizer:
     def is_not_improved(self, x_prev, x, eps=1e-6):
         return np.abs(x_prev - x).sum() < eps
 
-    def viz(self, totalstep):
-        visualizer = Visualizer(self.f, self.mem.xlist)
-        visualizer.run(methodname=type(self).__name__, fname=type(self.f).__name__, totalstep=totalstep, args=self.args)
+    def viz(self, x_0):
+        xlist = [x_0] + self.mem.xlist
+        visualizer = Visualizer(self.f, xlist)
+        visualizer.run(methodname=type(self).__name__, fname=type(self.f).__name__, args=self.args)
 
     @abstractmethod
     def fit(self, x_0: tuple):
@@ -33,7 +34,7 @@ class GradOptimizer:
 
 class FirstOrderGradOptimizer(GradOptimizer):
     def fit(self, x_0: tuple):
-        x = tuple2colvec(x_0)
+        x = x_0 = tuple2colvec(x_0)
 
         for i in range(self.maxiter):
             print(f"iter: {i:02d} | (x1, x2) = {'({:.3f} {:.3f})'.format(*colvec2tuple(x))} | y = {self.f(x):.3f}")
@@ -48,7 +49,7 @@ class FirstOrderGradOptimizer(GradOptimizer):
 
         print(f"\nGlobal optimum fount at:\niter: {i:02d} | x_opt = {'({:.3f} {:.3f})'.format(*colvec2tuple(x))} | y_opt = {self.f(x):.3f}")
         if self.doviz:
-            self.viz(totalstep=i)
+            self.viz(x_0)
 
 
 class SecondOrderGradOptimizer(GradOptimizer):
@@ -79,7 +80,7 @@ class SecondOrderGradOptimizer(GradOptimizer):
             self.mem.update(x, G, H)
         print(f"\nGlobal optimum fount at:\niter: {i:02d} | x_opt = {'({:.3f} {:.3f})'.format(*colvec2tuple(x))} | y_opt = {self.f(x):.3f}")
         if self.doviz:
-            self.viz(totalstep=i)
+            self.viz(x_0)
 
 
 class VanillaNewtonsMethod(SecondOrderGradOptimizer):

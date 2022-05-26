@@ -8,17 +8,21 @@ class Visualizer:
         self.f = f
         self.xlist = xlist
 
-    def run(self, methodname: str, fname: str, totalstep: int, args: dict):
-        self.X1 = np.hstack(self.xlist)[0]
-        self.X2 = np.hstack(self.xlist)[1]
-        Y = [self.f((x1, x2)) for x1, x2 in zip(self.X1, self.X2)]
+    def run(self, methodname: str, fname: str, args: dict):
 
-        X1absmax = max(abs(self.X1.min()), abs(self.X1.max()))
-        X2absmax = max(abs(self.X2.min()), abs(self.X2.max()))
+        # path
+        X1_path = np.hstack(self.xlist)[0]
+        X2_path = np.hstack(self.xlist)[1]
+        Y_path = [self.f((x1, x2)) for x1, x2 in zip(X1_path, X2_path)]
+        totalstep = len(Y_path) - 1
+
+        X1absmax = max(abs(X1_path.min()), abs(X1_path.max()))
+        X2absmax = max(abs(X2_path.min()), abs(X2_path.max()))
 
         X1 = np.linspace(-X1absmax, X1absmax, 100)
         X2 = np.linspace(-X2absmax, X2absmax, 100)
 
+        # convex obj function landscape
         X1_2d, X2_2d = np.meshgrid(X1, X2)
         Y_2d = np.array([self.f((x1, x2)) for x2 in X2 for x1 in X1])
 
@@ -32,7 +36,7 @@ class Visualizer:
         # scatter landscape
         ax.scatter(X1_2d, X2_2d, Y_2d, c=Y_2d, cmap="inferno", s=5, alpha=0.1)
         # scatter path
-        ax.scatter(self.X1, self.X2, Y, c='red', s=8, alpha=1.)
+        ax.scatter(X1_path, X2_path, Y_path, c='red', s=8, alpha=1.)
 
         def animate(i):
             ax.view_init(elev=10., azim=i)
