@@ -26,7 +26,7 @@ class Visualizer:
         fontlabel = {"fontsize":"large", "color":"black", "fontweight":"bold"}
         ax.set_xlabel("x1", fontdict=fontlabel, labelpad=16)
         ax.set_ylabel('x2', fontdict=fontlabel, labelpad=16)
-        ax.set_title(f"{methodname}\n\ny = {fname}", fontdict=fontlabel)
+        ax.set_title(f"{methodname}\n\n{fname}", fontdict=fontlabel)
         ax.view_init(elev=30., azim=120)
 
         # scatter landscape

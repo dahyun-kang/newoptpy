@@ -8,7 +8,7 @@ class FirstOrderGradOptimizer:
     def __init__(self, args):
         self.maxiter = args.maxiter
         self.stepsize = args.stepsize
-        self.dovis = args.vis
+        self.doviz = args.viz
 
         # store x, G (first-order gradient), H (inverse of second-order gradient)
         self.mem = TrajectoryMem()
@@ -20,9 +20,9 @@ class FirstOrderGradOptimizer:
     def is_not_improved(self, x_prev, x, eps=1e-6):
         return np.abs(x_prev - x).sum() < eps
 
-    def vis(self):
+    def viz(self):
         visualizer = Visualizer(self.f, self.mem.xlist)
-        visualizer.run(methodname=type(self).__name__, fname='(x1-2)^2+(x2-2)^2', stepsize=self.stepsize)
+        visualizer.run(methodname=type(self).__name__, fname=type(self.f).__name__, stepsize=self.stepsize)
 
     def fit(self, x_0: tuple):
         x = tuple2colvec(x_0)
@@ -39,15 +39,15 @@ class FirstOrderGradOptimizer:
             self.mem.update(x, G)
 
         print(f"\nGlobal optimum fount at:\niter: {i:02d} | x_opt = {'({:.3f} {:.3f})'.format(*colvec2tuple(x))} | y_opt = {self.f(x):.3f}")
-        if self.dovis:
-            self.vis()
+        if self.doviz:
+            self.viz()
 
 
 class SecondOrderGradOptimizer:
     def __init__(self, args):
         self.maxiter = args.maxiter
         self.stepsize = args.stepsize
-        self.dovis = args.vis
+        self.doviz = args.viz
 
         # store x, G (first-order gradient), H (inverse of second-order gradient)
         self.mem = TrajectoryMem()
@@ -69,9 +69,9 @@ class SecondOrderGradOptimizer:
     def is_not_improved(self, x_prev, x, eps=1e-6):
         return np.abs(x_prev - x).sum() < eps
 
-    def vis(self):
+    def viz(self):
         visualizer = Visualizer(self.f, self.mem.xlist)
-        visualizer.run(methodname=type(self).__name__, fname='(x1-2)^2+(x2-2)^2', stepsize=self.stepsize)
+        visualizer.run(methodname=type(self).__name__, fname=type(self.f).__name__, stepsize=self.stepsize)
 
     def fit(self, x_0: tuple):
         x = tuple2colvec(x_0)
@@ -89,8 +89,8 @@ class SecondOrderGradOptimizer:
 
             self.mem.update(x, G, H)
         print(f"\nGlobal optimum fount at:\niter: {i:02d} | x_opt = {'({:.3f} {:.3f})'.format(*colvec2tuple(x))} | y_opt = {self.f(x):.3f}")
-        if self.dovis:
-            self.vis()
+        if self.doviz:
+            self.viz()
 
 
 class VanillaNewtonsMethod(SecondOrderGradOptimizer):
