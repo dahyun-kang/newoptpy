@@ -27,6 +27,7 @@ class Visualizer:
         Y_2d = np.array([self.f((x1, x2)) for x2 in X2 for x1 in X1])
 
         fig, ax = plt.subplots(figsize=(10, 5), subplot_kw={"projection":"3d"})
+        fig.set_size_inches(5, 5, True)
         fontlabel = {"fontsize":"large", "color":"black", "fontweight":"bold"}
         ax.set_xlabel("x1", fontdict=fontlabel, labelpad=16)
         ax.set_ylabel('x2', fontdict=fontlabel, labelpad=16)

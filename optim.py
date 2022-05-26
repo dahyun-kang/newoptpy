@@ -64,7 +64,7 @@ class SecondOrderGradOptimizer(GradOptimizer):
         pass
 
     def fit(self, x_0: tuple):
-        x = tuple2colvec(x_0)
+        x = x_0 = tuple2colvec(x_0)
 
         for i in range(self.maxiter):
             print(f"iter: {i:02d} | (x1, x2) = {'({:.3f} {:.3f})'.format(*colvec2tuple(x))} | y = {self.f(x):.3f}")
