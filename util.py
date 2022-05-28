@@ -1,3 +1,4 @@
+import time
 import numpy as np
 
 
@@ -6,6 +7,15 @@ def tuple2colvec(x: tuple) -> np.array:
 
 def colvec2tuple(x: np.array) -> tuple:
     return tuple(x.T[0])
+
+def logging_time(original_fn):
+    def wrapper_fn(*args, **kwargs):
+        start_time = time.time()
+        result = original_fn(*args, **kwargs)
+        end_time = time.time()
+        print("Wall clock time [{}]: {:.4f} sec".format(original_fn.__name__, end_time-start_time))
+        return result
+    return wrapper_fn
 
 
 class TrajectoryMem:

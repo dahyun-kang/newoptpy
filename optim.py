@@ -1,7 +1,7 @@
 import numpy as np
 from abc import abstractmethod
 from viz import Visualizer
-from util import TrajectoryMem, tuple2colvec, colvec2tuple
+from util import TrajectoryMem, tuple2colvec, colvec2tuple, logging_time
 
 
 class GradOptimizer:
@@ -33,6 +33,7 @@ class GradOptimizer:
 
 
 class FirstOrderGradOptimizer(GradOptimizer):
+    # @logging_time
     def fit(self, x_0: tuple):
         x = x_0 = tuple2colvec(x_0)
 
@@ -63,6 +64,7 @@ class SecondOrderGradOptimizer(GradOptimizer):
         """
         pass
 
+    # @logging_time
     def fit(self, x_0: tuple):
         x = x_0 = tuple2colvec(x_0)
 
