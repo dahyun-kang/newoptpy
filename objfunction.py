@@ -24,8 +24,8 @@ class Paraboloid(ObjectiveFunction):
 
     def first_order_grad(self, x: np.array) -> np.array:
         x1, x2 = colvec2tuple(x)
-        grad_tuple = (2. * (x1 - 2.), 2. * (x2 - 2.))
-        return tuple2colvec(grad_tuple)
+        return np.array([[2. * (x1 - 2.)],
+                         [2. * (x2 - 2.)]])
 
     def second_order_grad(self, x) -> np.array:
         x1, x2 = colvec2tuple(x)
