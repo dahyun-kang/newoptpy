@@ -15,7 +15,6 @@ Python implementation of Newton's and Quasi-Newton's second-order optimization m
 <div align="center">
   <img src="assets/FirstOrderGradOptimizer_SkewedParaboloid_stepsize0.02_init[100.0,10.0].gif" alt="firstorder" width="300"/>
   <img src="assets/VanillaNewtonsMethod_SkewedParaboloid_stepsize1.0_init[100.0,10.0].gif" alt="newton" width="300"/>
-  <img src="assets/DavidonFletcherPowell_SkewedParaboloid_stepsize0.001_init[100.0,10.0].gif" alt="bfp" width="300"/>
 </div>
 
 ## :school: Disclaimer
