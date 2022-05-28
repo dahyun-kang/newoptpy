@@ -1,6 +1,6 @@
 import argparse
 from optim import FirstOrderGradOptimizer, VanillaNewtonsMethod, Davidon, DavidonFletcherPowell, BroydenFletcherGoldfarbShanno
-from objfunction import Paraboloid, SkewedParaboloid
+from objfunction import Paraboloid, SkewedParaboloid, SteepSidedValley
 
 
 if __name__ == '__main__':
@@ -26,6 +26,7 @@ if __name__ == '__main__':
     # Objective function
     funcdict = dict(paraboloid=Paraboloid,
                     skewedparaboloid=SkewedParaboloid,
+                    steepsidedvalley=SteepSidedValley,
                     )
     func = funcdict[args.func]
 
