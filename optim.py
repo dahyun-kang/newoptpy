@@ -39,7 +39,7 @@ class FirstOrderGradOptimizer(GradOptimizer):
 
         for i in range(self.maxiter):
             print(f"iter: {i:02d} | (x1, x2) = {'({:.3f} {:.3f})'.format(*colvec2tuple(x))} | y = {self.f(x):.3f}")
-            G = self.f.compute_grad(x)
+            G = self.f.first_order_grad(x)
             x_prev = x
 
             x = x - self.stepsize * G
@@ -70,7 +70,7 @@ class SecondOrderGradOptimizer(GradOptimizer):
 
         for i in range(self.maxiter):
             print(f"iter: {i:02d} | (x1, x2) = {'({:.3f} {:.3f})'.format(*colvec2tuple(x))} | y = {self.f(x):.3f}")
-            G = self.f.compute_grad(x)
+            G = self.f.first_order_grad(x)
             H = self.estimate_inv_hessian(x)
             x_prev = x
 
@@ -87,7 +87,7 @@ class SecondOrderGradOptimizer(GradOptimizer):
 
 class VanillaNewtonsMethod(SecondOrderGradOptimizer):
     def estimate_inv_hessian(self, x):
-        H = self.f.hessian(x)
+        H = self.f.second_order_grad(x)
         return np.linalg.inv(H)
 
 
