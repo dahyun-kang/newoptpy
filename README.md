@@ -1,5 +1,5 @@
 <div align="center">
-  <h1> NewOptpy </h1>
+  <h1> NewOptPy </h1>
   <h3> <ins>New</ins>ton’s second-order <ins>Opt</ins>imization methods in <ins>Py</ins>thon </h3>
 </div>
 
@@ -7,9 +7,8 @@
 
 <div align="center">
   <img src="assets/newoptpylogo.png" alt="logo" width="600"/>
+  <h4> Python implementation of Newton's and Quasi-Newton's second-order optimization methods </h4>
 </div>
-
-Python implementation of Newton's and Quasi-Newton's second-order optimization methods
 
 
 <div align="center">
