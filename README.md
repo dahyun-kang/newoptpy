@@ -43,7 +43,7 @@ This project was carried out as a part of a coursework term project [CSED490Y]: 
 * `init`: two-dimensional coordinate.
 * `viz`: flag to visualize the landscape.
 
-### Example run:
+### :runner: Example run:
 ```bash
 python main.py --optim dfp \
                --func skewedparaboloid \
@@ -51,3 +51,58 @@ python main.py --optim dfp \
                --init 100 10 \
                --viz
 ```
+
+## :alarm_clock: Time complexity comparison
+<table class="tg">
+<thead>
+  <tr>
+    <th class="tg-0pky"></th>
+    <th class="tg-0pky" colspan="2">total steps until convg.</th>
+    <th class="tg-0pky" colspan="2">computation time per iterations</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td class="tg-0pky">method</td>
+    <td class="tg-0pky">s. paraboloid</td>
+    <td class="tg-0pky">steep valley</td>
+    <td class="tg-0pky">s. paraboloid</td>
+    <td class="tg-0pky">steep valley</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">First-order gradient method</td>
+    <td class="tg-0pky">311</td>
+    <td class="tg-0pky">4431</td>
+    <td class="tg-0pky">0.231</td>
+    <td class="tg-0pky">0.267</td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">Vanilla Newton’s method</td>
+    <td class="tg-0lax">126</td>
+    <td class="tg-0lax">5</td>
+    <td class="tg-0lax">0.582</td>
+    <td class="tg-0lax">0.549</td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">Davidon’s method</td>
+    <td class="tg-0lax">292</td>
+    <td class="tg-0lax">4</td>
+    <td class="tg-0lax">0.489</td>
+    <td class="tg-0lax">0.538</td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">Davidon-Fletcher-Powell method</td>
+    <td class="tg-0lax">134</td>
+    <td class="tg-0lax">4</td>
+    <td class="tg-0lax">0.537</td>
+    <td class="tg-0lax">0.747</td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">Broyden-Fletcher-Goldfarb-Shanno</td>
+    <td class="tg-0lax">77</td>
+    <td class="tg-0lax">4</td>
+    <td class="tg-0lax">0.564</td>
+    <td class="tg-0lax">0.556</td>
+  </tr>
+</tbody>
+</table>
